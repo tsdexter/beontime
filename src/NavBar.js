@@ -94,18 +94,12 @@ export default class NavBar extends React.Component {
             <NavbarToggler onClick={this.toggle} />
             <Collapse isOpen={this.state.isOpen} navbar>
               <Nav className="mr-auto" navbar>
-                <NavItem>
+                {/* <NavItem>
                   <RouterNavLink to="/" className="nav-link" exact>Home</RouterNavLink>
                 </NavItem>
-                {calendarLink}
+                {calendarLink} */}
               </Nav>
               <Nav className="justify-content-end" navbar>
-                <NavItem>
-                  <NavLink href="https://developer.microsoft.com/graph/docs/concepts/overview" target="_blank">
-                    <i className="fas fa-external-link-alt mr-1"></i>
-                    Docs
-                  </NavLink>
-                </NavItem>
                 <AuthNavItem
                   isAuthenticated={this.props.isAuthenticated}
                   authButtonMethod={this.props.authButtonMethod}
