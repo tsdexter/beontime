@@ -65,6 +65,7 @@ class App extends Component {
                 <Calendar {...props}
                   showError={this.setErrorMessage.bind(this)} />
               } />
+            <p style={{ textAlign: 'center', fontSize: '.75rem' }}>Created with ❤ by <a href="https://github.com/tsdexter/beontime" target="_BLANK">Thomas Dexter</a></p>
           </Container>
         </div>
       </Router>
