@@ -99,6 +99,8 @@ export default class Calendar extends React.Component {
         warn: true,
         reallyWarn: delta.minutes < 5
       });
+    } else {
+      this.setState({ warn: false, reallyWarn: false });
     }
   }
 
