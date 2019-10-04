@@ -51,6 +51,10 @@ function formatDateTime(dateTime) {
   return moment.utc(dateTime).local().format('M/D/YY h:mm A');
 }
 
+function formatTime(dateTime) {
+  return moment.utc(dateTime).local().format('h:mm A');
+}
+
 export default class Calendar extends React.Component {
   constructor(props) {
     super(props);
@@ -126,7 +130,7 @@ export default class Calendar extends React.Component {
             <StyledCountdown className={`${this.state.warn && 'warn'} ${this.state.reallyWarn && 'reallyWarn'}`}>
               <h1>{next.subject}</h1>
               <Countdown date={this.convertUTCDateToLocalDate(date)} onTick={this.onTick} />
-              <h2>@{next.location.displayName}</h2>
+              <h2>{next.location.displayName} @ {formatTime(next.start.dateTime)}</h2>
             </StyledCountdown>
           </div>
         }
