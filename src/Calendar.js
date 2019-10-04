@@ -84,7 +84,7 @@ export default class Calendar extends React.Component {
     this.loadEvents();
     const poll = window.setInterval(() => {
       this.loadEvents();
-    }, 10000);
+    }, 60000);
     this.setState({ poll });
   }
 
