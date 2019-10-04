@@ -1,3 +1,11 @@
+# BeOnTime
+
+This is a quick little SPA that displays your upcoming Outlook/Office365 appointments with a large countdown to the next appointment. Once there is less than 10 minutes remaining the countdown doubles in size and turns red. 
+
+I leave this open in a window at the top right of my secondary monitor to make sure I don't miss any meetings due to being so focused on my work ;) 
+
+--
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
