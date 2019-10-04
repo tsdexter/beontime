@@ -4,16 +4,46 @@ import moment from 'moment';
 import config from './Config';
 import { getEvents } from './GraphService';
 import Countdown from 'react-countdown-now';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+
+const blink = keyframes`
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+`;
 
 const StyledCountdown = styled.div`
   span {
     display: block;
     font-weight: 800;
-    font-size: ${props => props.warn ? '10rem' : '5rem'};
-    color: ${props => props.warn ? 'red' : 'green'};
+    font-size: 5rem;
+    color: green;
     text-align: center;
     margin: 0 auto;
+  }
+  &.warn { 
+    span {
+      font-size: 10rem;
+      color: red;
+    }
+    &.reallyWarn {
+      span {
+        animation: ${blink} 500ms linear infinite;
+      }
+    }
+  }
+  h1, h2 {
+    margin: 0 auto;
+    text-align: center;
+    font-weight: bold;
+  }
+  h2 {
+    margin-bottom: 2rem;
+    font-size: 2rem;
   }
 `;
 
@@ -28,7 +58,8 @@ export default class Calendar extends React.Component {
     this.state = {
       events: [],
       poll: null,
-      warn: false
+      warn: false,
+      reallyWarn: false,
     };
   }
 
@@ -61,22 +92,41 @@ export default class Calendar extends React.Component {
     window.clearInterval(this.state.poll);
   }
 
-  onTick(delta) {
+  onTick = (delta) => {
     // console.log(delta);
-    if (delta.minutes < 10) {
-      this.setState({ warn: true });
+    if (delta.days === 0 && delta.hours === 0 && delta.minutes < 10) {
+      this.setState({
+        warn: true,
+        reallyWarn: delta.minutes < 5
+      });
     }
+  }
+
+  convertUTCDateToLocalDate(date) {
+    var newDate = new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000);
+
+    var offset = date.getTimezoneOffset() / 60;
+    var hours = date.getHours();
+
+    newDate.setHours(hours - offset);
+
+    return newDate;
   }
 
   render() {
     const next = this.state.events.filter(e => !e.isAllDay && !e.isCancelled)[0];
+    let date;
+    if (next) date = new Date(next.start.dateTime);
     return (
       <div>
-        <h1>Calendar</h1>
         {next &&
-          <StyledCountdown warn={this.state.warn}>
-            <Countdown date={new Date(next.start.dateTime)} onTick={this.onTick} />
-          </StyledCountdown>
+          <div>
+            <StyledCountdown className={`${this.state.warn && 'warn'} ${this.state.reallyWarn && 'reallyWarn'}`}>
+              <h1>{next.subject}</h1>
+              <Countdown date={this.convertUTCDateToLocalDate(date)} onTick={this.onTick} />
+              <h2>@{next.location.displayName}</h2>
+            </StyledCountdown>
+          </div>
         }
         <Table>
           <thead>

@@ -15,13 +15,13 @@ class App extends Component {
     super(props);
 
     this.userAgentApplication = new UserAgentApplication({
-        auth: {
-            clientId: config.appId
-        },
-        cache: {
-            cacheLocation: "localStorage",
-            storeAuthStateInCookie: true
-        }
+      auth: {
+        clientId: config.appId
+      },
+      cache: {
+        cacheLocation: "localStorage",
+        storeAuthStateInCookie: true
+      }
     });
 
     var user = this.userAgentApplication.getAccount();
@@ -50,7 +50,7 @@ class App extends Component {
           <NavBar
             isAuthenticated={this.state.isAuthenticated}
             authButtonMethod={this.state.isAuthenticated ? this.logout.bind(this) : this.login.bind(this)}
-            user={this.state.user}/>
+            user={this.state.user} />
           <Container>
             {error}
             <Route exact path="/"
@@ -60,7 +60,7 @@ class App extends Component {
                   user={this.state.user}
                   authButtonMethod={this.login.bind(this)} />
               } />
-            <Route exact path="/calendar"
+            <Route exact path="/countdown"
               render={(props) =>
                 <Calendar {...props}
                   showError={this.setErrorMessage.bind(this)} />
@@ -73,7 +73,7 @@ class App extends Component {
 
   setErrorMessage(message, debug) {
     this.setState({
-      error: {message: message, debug: debug}
+      error: { message: message, debug: debug }
     });
   }
 
@@ -83,13 +83,13 @@ class App extends Component {
         {
           scopes: config.scopes,
           prompt: "select_account"
-      });
+        });
       await this.getUserProfile();
     }
-    catch(err) {
+    catch (err) {
       var error = {};
 
-      if (typeof(err) === 'string') {
+      if (typeof (err) === 'string') {
         var errParts = err.split('|');
         error = errParts.length > 1 ?
           { message: errParts[1], debug: errParts[0] } :
@@ -137,9 +137,9 @@ class App extends Component {
         });
       }
     }
-    catch(err) {
+    catch (err) {
       var error = {};
-      if (typeof(err) === 'string') {
+      if (typeof (err) === 'string') {
         var errParts = err.split('|');
         error = errParts.length > 1 ?
           { message: errParts[1], debug: errParts[0] } :

@@ -81,7 +81,7 @@ export default class NavBar extends React.Component {
     if (this.props.isAuthenticated) {
       calendarLink = (
         <NavItem>
-          <RouterNavLink to="/calendar" className="nav-link" exact>Calendar</RouterNavLink>
+          <RouterNavLink to="/countdown" className="nav-link" exact>Countdown</RouterNavLink>
         </NavItem>
       );
     }
@@ -90,7 +90,7 @@ export default class NavBar extends React.Component {
       <div>
         <Navbar color="dark" dark expand="md" fixed="top">
           <Container>
-            <NavbarBrand href="/">React Graph Tutorial</NavbarBrand>
+            <NavbarBrand href="/">BeOnTime</NavbarBrand>
             <NavbarToggler onClick={this.toggle} />
             <Collapse isOpen={this.state.isOpen} navbar>
               <Nav className="mr-auto" navbar>
