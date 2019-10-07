@@ -75,9 +75,9 @@ export default class Calendar extends React.Component {
       });
       // Get the user's events
       var events = await getEvents(accessToken);
-      console.log({ events });
+      // console.log({ events });
       // Update the array of events in state
-      this.setState({ events: events.value });
+      this.setState({ events: events.value.sort((a, b) => (new moment(a.start.dateTime.valueOf()) - new moment(b.start.dateTime.valueOf()))) });
     }
     catch (err) {
       this.props.showError('ERROR', JSON.stringify(err));
@@ -121,6 +121,7 @@ export default class Calendar extends React.Component {
 
   render() {
     const next = this.state.events.filter(e => !e.isAllDay && !e.isCancelled)[0];
+    const that = this;
     let date;
     if (next) date = new Date(next.start.dateTime);
     return (
@@ -142,11 +143,13 @@ export default class Calendar extends React.Component {
               <th scope="col">Location</th>
               <th scope="col">Start</th>
               <th scope="col">End</th>
+              <th scope="col">Countdown</th>
             </tr>
           </thead>
           <tbody>
             {this.state.events.map(
-              function (event) {
+              (event) => {
+                const date = new Date(event.start.dateTime);
                 return (
                   <tr key={event.id}>
                     <td>{event.organizer.emailAddress.name}</td>
@@ -154,6 +157,7 @@ export default class Calendar extends React.Component {
                     <td>{event.location.displayName}</td>
                     <td>{formatDateTime(event.start.dateTime)}</td>
                     <td>{formatDateTime(event.end.dateTime)}</td>
+                    <td><Countdown date={that.convertUTCDateToLocalDate(date)} /></td>
                   </tr>
                 );
               })}
