@@ -120,7 +120,7 @@ export default class Calendar extends React.Component {
   }
 
   render() {
-    const next = this.state.events.filter(e => !e.isAllDay && !e.isCancelled)[0];
+    const next = this.state.events.filter(e => !e.isAllDay && !e.isCancelled && (moment(this.convertUTCDateToLocalDate(new Date(e.start.dateTime.valueOf()))) > moment(Date.now())))[0];
     const that = this;
     let date;
     if (next) date = new Date(next.start.dateTime);
