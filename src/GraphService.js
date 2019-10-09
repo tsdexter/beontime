@@ -24,9 +24,11 @@ export async function getEvents(accessToken) {
   const client = getAuthenticatedClient(accessToken);
   const now = new Date();
   const nowUTC = new Date(now.toUTCString());
+  const end = new Date(+new Date() + 1209600000);
+  const endUTC = new Date(end.toUTCString());
   const events = await client
-    .api(`/me/calendar/calendarView?startDateTime=${nowUTC.toISOString()}&endDateTime=2019-10-11T23:59:59.0000000`)
+    .api(`/me/calendar/calendarView?startDateTime=${nowUTC.toISOString()}&endDateTime=${endUTC.toISOString()}`)
     .get();
-
+  console.log({ events })
   return events;
 }
