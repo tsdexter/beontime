@@ -16,7 +16,8 @@ class App extends Component {
 
     this.userAgentApplication = new UserAgentApplication({
       auth: {
-        clientId: config.appId
+        clientId: config.appId,
+        redirectUri: `${window.location.protocol}//${window.location.host}`
       },
       cache: {
         cacheLocation: "localStorage",
