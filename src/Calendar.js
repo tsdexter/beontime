@@ -1,169 +1,122 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Table } from 'reactstrap';
 import moment from 'moment';
 import config from './Config';
 import { getEvents } from './GraphService';
 import Countdown from 'react-countdown-now';
 import styled, { keyframes } from 'styled-components';
+import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsalAuthentication } from '@azure/msal-react';
+import { InteractionType } from '@azure/msal-browser';
+import { graphFetch } from './graphFetch';
+import { datetimeToLocal } from './utils';
+import { UserContext } from './App';
 
-const blink = keyframes`
-  from {
-    opacity: 0;
-  }
+export default function Calendar(props) {
+  let { events } = useContext(UserContext);
+  events = events?.filter(e => !e.isAllDay && !e.isCancelled && (moment(datetimeToLocal(e.start.dateTime)) > moment(Date.now())));
+  const next = events?.length > 0 && events[0];
 
-  to {
-    opacity: 1;
-  }
-`;
+  // set the window to full width and 100px tall
+  useEffect(() => {
+    window.resizeTo(window.screen.width, 145)
+    window.moveTo(0,0)
+  }, [])
 
-const StyledCountdown = styled.div`
-  span {
-    display: block;
-    font-weight: 800;
-    font-size: 5rem;
-    color: green;
-    text-align: center;
-    margin: 0 auto;
-  }
-  &.warn { 
-    span {
-      font-size: 10rem;
-      color: red;
-    }
-    &.reallyWarn {
-      span {
-        animation: ${blink} 500ms linear infinite;
+  return <>
+    <AuthenticatedTemplate>
+      {next &&
+        <CalendarEntry entry={next} next={true} />
       }
-    }
-  }
-  h1, h2 {
-    margin: 0 auto;
-    text-align: center;
-    font-weight: bold;
-  }
-  h2 {
-    margin-bottom: 2rem;
-    font-size: 2rem;
-  }
-`;
-
-function formatDateTime(dateTime) {
-  return moment.utc(dateTime).local().format('M/D/YY h:mm A');
+      {events?.length > 1 && 
+        <div className="text-center font-bold my-4">Upcoming Events</div>
+      }
+      {events?.filter((e, i) => i > 0).map((e, i) => 
+        <CalendarEntry key={i} entry={e} />
+      )}
+    </AuthenticatedTemplate>
+    <UnauthenticatedTemplate>
+      <div className="mx-auto text-3xl text-center">You must be logged in to view meetings...</div>
+    </UnauthenticatedTemplate>
+  </>
 }
 
-function formatTime(dateTime) {
-  return moment.utc(dateTime).local().format('h:mm A');
-}
-
-export default class Calendar extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      events: [],
-      poll: null,
-      warn: false,
-      reallyWarn: false,
-    };
-  }
-
-  async loadEvents() {
-    try {
-      // Get the user's access token
-      var accessToken = await window.msal.acquireTokenSilent({
-        scopes: config.scopes
-      });
-      // Get the user's events
-      var events = await getEvents(accessToken);
-      // console.log({ events });
-      // Update the array of events in state
-      this.setState({ events: events.value.sort((a, b) => (new moment(a.start.dateTime.valueOf()) - new moment(b.start.dateTime.valueOf()))) });
-    }
-    catch (err) {
-      this.props.showError('ERROR', JSON.stringify(err));
-    }
-  }
-
-  async componentDidMount() {
-    this.loadEvents();
-    const poll = window.setInterval(() => {
-      this.loadEvents();
-    }, 60000);
-    this.setState({ poll });
-  }
-
-  componentWillUnmount() {
-    window.clearInterval(this.state.poll);
-  }
-
-  onTick = (delta) => {
+function CalendarEntry({entry, next}) {
+  const [warn, setWarn] = React.useState(false);
+  const [joined, setJoined] = React.useState(false);
+  const [reallyWarn, setReallyWarn] = React.useState(false);
+  const [startingNow, setStartingNow] = React.useState(false);
+  const {me, manager} = useContext(UserContext)
+  // console.log({me, manager})
+  const withMgmt = entry.attendees.find(a => a.emailAddress.address === manager?.mail);
+  const onTick = (delta) => {
     // console.log(delta);
+    setWarn(false);
+    setReallyWarn(false);
+    setStartingNow(false);
     if (delta.days === 0 && delta.hours === 0 && delta.minutes < 10) {
-      this.setState({
-        warn: true,
-        reallyWarn: delta.minutes < 5
-      });
-    } else {
-      this.setState({ warn: false, reallyWarn: false });
+      setWarn(true);
+      setReallyWarn(delta.minutes < 1);
+      setStartingNow(delta.minutes < 1 && delta.seconds < 30);
+    } 
+    if (next) {
+      // setWarn(true)
+      // setReallyWarn(true)
+      // setStartingNow(true)
     }
   }
 
-  convertUTCDateToLocalDate(date) {
-    var newDate = new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000);
-
-    var offset = date.getTimezoneOffset() / 60;
-    var hours = date.getHours();
-
-    newDate.setHours(hours - offset);
-
-    return newDate;
+  const handleOpenJoin = (e) => {
+    e.preventDefault()
+    setJoined(true)
+    window.resizeTo(window.screen.width, 145)
+    window.moveTo(0,0)
+    window.open(e.target.href, "_blank")
   }
 
-  render() {
-    const next = this.state.events.filter(e => !e.isAllDay && !e.isCancelled && (moment(this.convertUTCDateToLocalDate(new Date(e.start.dateTime.valueOf()))) > moment(Date.now())))[0];
-    const that = this;
-    let date;
-    if (next) date = new Date(next.start.dateTime);
-    return (
-      <div>
-        {next &&
-          <div>
-            <StyledCountdown className={`${this.state.warn && 'warn'} ${this.state.reallyWarn && 'reallyWarn'}`}>
-              <h1>{next.subject}</h1>
-              <Countdown date={this.convertUTCDateToLocalDate(date)} onTick={this.onTick} />
-              <h2>{next.location.displayName} @ {formatTime(next.start.dateTime)}</h2>
-            </StyledCountdown>
-          </div>
-        }
-        <Table>
-          <thead>
-            <tr>
-              <th scope="col">Organizer</th>
-              <th scope="col">Subject</th>
-              <th scope="col">Location</th>
-              <th scope="col">Start</th>
-              <th scope="col">End</th>
-              <th scope="col">Countdown</th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.state.events.map(
-              (event) => {
-                const date = new Date(event.start.dateTime);
-                return (
-                  <tr key={event.id}>
-                    <td>{event.organizer.emailAddress.name}</td>
-                    <td>{event.subject}</td>
-                    <td>{event.location.displayName}</td>
-                    <td>{formatDateTime(event.start.dateTime)}</td>
-                    <td>{formatDateTime(event.end.dateTime)}</td>
-                    <td><Countdown date={that.convertUTCDateToLocalDate(date)} /></td>
-                  </tr>
-                );
-              })}
-          </tbody>
-        </Table>
+  useEffect(() => {
+    console.log({warn, reallyWarn, startingNow})
+    if (startingNow) {
+      window.resizeTo(window.screen.width, window.screen.height)
+      window.focus()
+    } else {
+      window.resizeTo(window.screen.width, 145)
+    }
+  }, [warn, reallyWarn, startingNow])
+  return <div className={`${withMgmt ? `bg-red-100` : `bg-gray-100`} ${next && `h-[100px]`} w-full`}>
+    <div className="p-2 h-full flex gap-2 items-center justify-center border-b-8 border-white">
+      <div className="w-1/4 text-left leading-4 font-bold">
+        <div className="flex gap-">
+          <div className="w-2/3 mr-auto">{entry?.subject}</div>
+          <div className="text-right w-1/3">{datetimeToLocal(entry?.start?.dateTime).toLocaleString()}</div>
+        </div>
+        <div className="font-normal text-sm">Organizer: {entry?.organizer?.emailAddress?.name}</div>
       </div>
-    );
-  }
+      <div className={`w-1/2 text-center text-5xl font-bold ${warn || reallyWarn || startingNow ? `text-red-500` : `text-green-600`} ${reallyWarn ? `animate-ping !opacity-100` : ``}`}>
+        <Countdown date={datetimeToLocal(entry?.start?.dateTime)} onTick={onTick} />
+      </div>
+      <div className="w-1/4 flex justify-end gap-2">
+        <a onClick={handleOpenJoin} href={entry.webLink} target="_blank" className="bg-blue-600 text-white px-4 py-2 rounded no-underline" rel="noreferrer">Open</a>
+        {entry.isOnlineMeeting &&
+          <a onClick={handleOpenJoin} href={entry.onlineMeeting.joinUrl} target="_blank" className="bg-purple-800 text-white px-4 py-2 rounded no-underline" rel="noreferrer">Join</a>
+        }
+      </div>
+    </div>
+    {startingNow && !joined &&
+      <div className="w-full h-full border-8 border-red-500 flex flex-col items-center justify-center z-50 bg-white absolute top-0 left-0">
+        <div className="text-5xl font-bold">"{entry.subject}" is starting now</div>
+        {withMgmt || true &&
+          <div className="my-8 text-3xl font-bold text-red-500">Your manager is attending - don't be late 😘</div>
+        }
+        <div className={`w-1/2 text-center text-5xl font-bold ${warn || reallyWarn || startingNow ? `text-red-500` : `text-green-600`} ${reallyWarn ? `animate-ping !opacity-100` : ``}`}>
+          <Countdown date={datetimeToLocal(entry?.start?.dateTime)} onTick={onTick} />
+        </div>
+        <div className="mt-4 flex gap-2 text-5xl">
+          <a onClick={handleOpenJoin} href={entry.webLink} target="_blank" className="bg-blue-600 text-white px-8 py-4 rounded no-underline" rel="noreferrer">Open</a>
+          {entry.isOnlineMeeting &&
+            <a onClick={handleOpenJoin} href={entry.onlineMeeting.joinUrl} target="_blank" className="bg-purple-800 text-white px-8 py-4 rounded no-underline" rel="noreferrer">Join</a>
+          }
+        </div>
+      </div>
+    }
+  </div>
 }
