@@ -37,6 +37,7 @@ export default function Welcome(props) {
             <li>Open the page in Chrome</li>
             <li>Click the vertical dots menu at the top right</li>
             <li>Open the "More Tools" menu</li>
+            <li>Click "Create shortcut"</li>
             <li>Make sure you check "Open as window"</li>
             <li>Click "Create"</li>
             <li>The countdown will open in a new window</li>
