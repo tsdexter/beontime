@@ -1,5 +1,5 @@
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { UserContext } from "./App";
 import { scopes } from "./Config";
 

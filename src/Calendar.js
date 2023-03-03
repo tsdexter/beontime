@@ -1,13 +1,7 @@
 import React, { useContext, useEffect } from 'react';
-import { Table } from 'reactstrap';
 import moment from 'moment';
-import config from './Config';
-import { getEvents } from './GraphService';
 import Countdown from 'react-countdown-now';
-import styled, { keyframes } from 'styled-components';
-import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsalAuthentication } from '@azure/msal-react';
-import { InteractionType } from '@azure/msal-browser';
-import { graphFetch } from './graphFetch';
+import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react';
 import { datetimeToLocal } from './utils';
 import { UserContext } from './App';
 
@@ -45,7 +39,7 @@ function CalendarEntry({entry, next}) {
   const [joined, setJoined] = React.useState(false);
   const [reallyWarn, setReallyWarn] = React.useState(false);
   const [startingNow, setStartingNow] = React.useState(false);
-  const {me, manager} = useContext(UserContext)
+  const {manager} = useContext(UserContext)
   // console.log({me, manager})
   const withMgmt = entry.attendees.find(a => a.emailAddress.address === manager?.mail);
   const onTick = (delta) => {
@@ -104,7 +98,7 @@ function CalendarEntry({entry, next}) {
     {startingNow && !joined &&
       <div className="w-full h-full border-8 border-red-500 flex flex-col items-center justify-center z-50 bg-white absolute top-0 left-0">
         <div className="text-5xl font-bold">"{entry.subject}" is starting now</div>
-        {withMgmt || true &&
+        {withMgmt &&
           <div className="my-8 text-3xl font-bold text-red-500">Your manager is attending - don't be late 😘</div>
         }
         <div className={`w-1/2 text-center text-5xl font-bold ${warn || reallyWarn || startingNow ? `text-red-500` : `text-green-600`} ${reallyWarn ? `animate-ping !opacity-100` : ``}`}>

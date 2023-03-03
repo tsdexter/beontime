@@ -1,17 +1,12 @@
-import React, { Component, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { Container } from 'reactstrap';
-import { UserAgentApplication } from 'msal';
-import NavBar from './NavBar';
-import ErrorMessage from './ErrorMessage';
 import Welcome from './Welcome';
-import config, { scopes } from './Config';
-import { getUserDetails } from './GraphService';
+import { scopes } from './Config';
 import 'bootstrap/dist/css/bootstrap.css';
 import Calendar from './Calendar';
 import { MsalProvider, useIsAuthenticated, useMsal, useMsalAuthentication } from '@azure/msal-react';
 import { AuthButton } from './AuthButton';
-import { InteractionRequiredAuthError, InteractionType } from '@azure/msal-browser';
+import { InteractionType } from '@azure/msal-browser';
 import { graphFetch } from './graphFetch';
 
 // create UserContext
@@ -23,7 +18,7 @@ export const UserContextProvider = (props) => {
   const [me, setMe] = React.useState(null);
   const [manager, setManager] = React.useState(null);
   const [events, setEvents] = React.useState(null);
-  const [ssoLaunched, setSsoLaunched] = React.useState(false);
+  const [ssoLaunched] = React.useState(false);
   const {
     result, error
   } = useMsalAuthentication(InteractionType.Silent, {
@@ -130,7 +125,7 @@ function App(props) {
             } />
           </Routes>
         </Router>
-        <p className="my-4 mx-auto text-center text-sm">Created with ❤ by <a href="https://github.com/tsdexter/beontime" target="_BLANK">Thomas Dexter</a></p>
+        <p className="my-4 mx-auto text-center text-sm">Created with ❤ by <a href="https://github.com/tsdexter/beontime" target="_BLANK" rel="noreferrer">Thomas Dexter</a></p>
       </UserContextProvider>
     </MsalProvider>
   )

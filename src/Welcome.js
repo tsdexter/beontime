@@ -1,19 +1,11 @@
-import { AuthenticatedTemplate, UnauthenticatedTemplate, useIsAuthenticated, useMsalAuthentication } from '@azure/msal-react';
-import React, { useContext, useEffect } from 'react';
-import Calendar from './Calendar';
+import { AuthenticatedTemplate, UnauthenticatedTemplate } from '@azure/msal-react';
+import React, { useEffect } from 'react';
 import { useMsal } from '@azure/msal-react';
-import { scopes } from './Config';
-import { InteractionRequiredAuthError } from 'msal';
-import { InteractionType } from '@azure/msal-browser';
-import { graphFetch } from './graphFetch';
-import { Link } from 'react-router-dom';
 import { launch } from './utils';
-import { UserContext } from './App';
 
 export default function Welcome(props) {
-  const [username, setUsername] = React.useState('')
+  const [, setUsername] = React.useState('')
   const [name, setName] = React.useState('')
-  const { me } = useContext(UserContext);
   const { instance } = useMsal();
 
   const currentAccount = instance.getActiveAccount();
